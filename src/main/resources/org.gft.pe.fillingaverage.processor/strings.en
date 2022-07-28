@@ -1,0 +1,14 @@
+org.gft.pe.fillingaverage.processor.title=FillingAverage
+org.gft.pe.fillingaverage.processor.description=If there are no readings of values for a certain period of time (delta), it adds to the output the average value of the data received up to that moment (present in a list with user-defined size [nMax]) and the average timestamp of the last two values received
+
+value.title=Input value for the mathematical mean
+value.description=Specify how many values to use for the mathematical mean
+
+timestamp_value.title=Timestamp
+timestamp_value.description=Timestamp value
+
+nMax.title = Maximum number
+nMax.description =Maximum number of values for the average
+
+delta.title=Time Window Length (Millisecond)
+delta.description=Specifies the size of the time window in millisecond.
