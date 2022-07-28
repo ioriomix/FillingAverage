@@ -37,8 +37,11 @@ import org.apache.streampipes.wrapper.routing.SpOutputCollector;
 import org.apache.streampipes.wrapper.standalone.ProcessorParams;
 import org.apache.streampipes.wrapper.standalone.StreamPipesDataProcessor;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -78,7 +81,7 @@ public class FillingAverageDataProcessor extends StreamPipesDataProcessor {
             .requiredIntegerParameter(Labels.withId(DELTA))
 
             .outputStrategy(OutputStrategies.append(PrimitivePropertyBuilder.create(Datatypes.Double, "outputValue").build()
-                    ,PrimitivePropertyBuilder.create(Datatypes.Double, "calculated_timestamp").build()))
+                    ,PrimitivePropertyBuilder.create(Datatypes.String, "calculated_timestamp").build()))
 
             .build();
   }
@@ -159,6 +162,10 @@ public class FillingAverageDataProcessor extends StreamPipesDataProcessor {
     if ((timestamp2 == 0.0) || (timestamp2 - timestamp1 <= delta) ) {
       outputValue=value;
 
+
+      meanTstamp = Double.parseDouble(timestampStr);
+
+
       //if more than one value was received or the difference between timestamp2 and timestamp1 > delta
       //then set outputValue=mean
     }else{
@@ -172,9 +179,14 @@ public class FillingAverageDataProcessor extends StreamPipesDataProcessor {
       meanTstamp = performMeanOperation(listTmestamp);
     }
 
+    //transform timestamp into date format "yyyy-MM-dd hh:mm:ss"
+    String strMeanTStamp = dataTransformation(meanTstamp);
+
     //add to the event output the value and the mean timestamp
     event.addField("outputValue", outputValue);
-    event.addField("calculated_timestamp", meanTstamp);
+    event.addField("calculated_timestamp", strMeanTStamp);
+    out.collect(event);
+
     out.collect(event);
   }
 
@@ -189,6 +201,16 @@ public class FillingAverageDataProcessor extends StreamPipesDataProcessor {
     values.forEach(ds::addValue);
     double mean = ds.getMean();
     return mean;
+  }
+
+  //function that formats the timestamp from milliseconds to date
+  public String dataTransformation (double tStamp){
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis((long) tStamp);
+
+    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    return formatter.format(calendar.getTime());
+
   }
 
 
